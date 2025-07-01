@@ -20,7 +20,14 @@ import { changPasswordSchema } from "../schemas/authSchema";
 import { useState } from "react";
 
 const Dashboard = () => {
-  const { user, logoutUser, loading, changePassword } = useAuthStore();
+  const {
+    user,
+    logoutUser,
+    loading,
+    verificationLoading,
+    changePassword,
+    resendEmailVerficationLink,
+  } = useAuthStore();
 
   const {
     register,
@@ -73,6 +80,20 @@ const Dashboard = () => {
       });
 
       setDialogOpen(false);
+    }
+
+    if (error) {
+      toast.error(error);
+    }
+  };
+
+  const handleResendEmailVerificationLink = async () => {
+    await resendEmailVerficationLink();
+
+    const { success, error } = useAuthStore.getState();
+
+    if (success) {
+      toast.success(success);
     }
 
     if (error) {
@@ -216,6 +237,22 @@ const Dashboard = () => {
                   </DialogContent>
                 </form>
               </Dialog>
+              {!user?.isEmailVerified && (
+                <button
+                  className="w-full h-12 flex items-center justify-center gap-2 rounded-xl bg-neutral-900 text-white font-bold hover:bg-gray-200 active:scale-95 transition-all duration-200 group mt-4 hover:text-black cursor-pointer"
+                  onClick={handleResendEmailVerificationLink}
+                  disabled={verificationLoading}
+                >
+                  <span className={`${verificationLoading && "hidden"}`}>
+                    Resend Verification Email
+                  </span>
+                  <Loader2
+                    className={`w-10 h-10 animate-spin ${
+                      !verificationLoading && "hidden"
+                    }`}
+                  />
+                </button>
+              )}
 
               <button
                 className="w-full h-12 flex items-center justify-center gap-2 rounded-xl bg-neutral-900 text-white font-bold hover:bg-gray-200 active:scale-95 transition-all duration-200 group mt-4 hover:text-black cursor-pointer"

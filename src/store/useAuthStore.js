@@ -6,6 +6,7 @@ import {
   loginService,
   logoutService,
   registerService,
+  ResendEmailVerificationService,
   resetPasswordService,
 } from "../services/authService";
 import { getAxiosErrorMessage } from "../utils/errorHandling";
@@ -16,6 +17,7 @@ const useAuthStore = create((set, get) => ({
   success: null,
   user: null,
   authChecked: false,
+  verificationLoading: false,
 
   registerUser: async (userdata) => {
     const { loading } = get();
@@ -194,7 +196,9 @@ const useAuthStore = create((set, get) => ({
     try {
       set({ loading: true, error: null, success: null });
 
-      const response = await resetPasswordService(data);
+      const response = await resetPasswordService(data.token, {
+        newPassword: data.newPassword,
+      });
 
       if (response.success) {
         set({
@@ -208,6 +212,33 @@ const useAuthStore = create((set, get) => ({
       set({
         error: errorMessage ?? "Something went wrong!!",
         loading: false,
+        success: null,
+      });
+    }
+  },
+
+  resendEmailVerficationLink: async () => {
+    const { verificationLoading } = get();
+
+    if (verificationLoading) return;
+
+    try {
+      set({ verificationLoading: true, error: null, success: null });
+
+      const response = await ResendEmailVerificationService();
+
+      if (response.success) {
+        set({
+          error: null,
+          verificationLoading: false,
+          success: response?.message ?? "Success",
+        });
+      }
+    } catch (error) {
+      const errorMessage = getAxiosErrorMessage(error);
+      set({
+        error: errorMessage ?? "Something went wrong!!",
+        verificationLoading: false,
         success: null,
       });
     }

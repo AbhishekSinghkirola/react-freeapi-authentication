@@ -37,3 +37,8 @@ export const resetPasswordService = async (resetToken, payload) => {
   );
   return response.data;
 };
+
+export const ResendEmailVerificationService = async () => {
+  const response = await axiosInstance.post(`/users/resend-email-verification`);
+  return response.data;
+};
